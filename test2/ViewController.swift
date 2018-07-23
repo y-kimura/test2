@@ -12,13 +12,23 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     var myCollectionView : UICollectionView!
     
+    var timerLabel: UILabel!
+    
     var cellState = Array<Int>(repeating:0, count:25)
+    
+    var cellRow: Float = 5
+    
+    // 時間計測用の変数.
+    var count : Float = 0
+    
+    // タイマー
+    var timer : Timer!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // cellStateランダム
-        for _ in 1...10 {
+        for _ in 1...1 {
             culcCellState(Int.random(in: 0 ... 24))
         }
         
@@ -34,9 +44,6 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         
         layout.itemSize = CGSize(width: cellWidth , height:cellHeight)
         
-        // セクション毎のヘッダーサイズ.
-        layout.headerReferenceSize = CGSize(width:100,height:30)
-        
         // CollectionViewを生成.
         myCollectionView = UICollectionView(frame: self.view.frame, collectionViewLayout: layout)
         
@@ -48,15 +55,51 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         
         myCollectionView.backgroundColor = UIColor.gray
         
-        self.view.addSubview(myCollectionView)
+        myCollectionView.widthAnchor.constraint(equalToConstant: self.view.frame.width).isActive = true
+        myCollectionView.heightAnchor.constraint(equalToConstant: self.view.frame.width).isActive = true
         
         
-        let label = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 21))
-        label.center = CGPoint(x: 160, y: 285)
-        label.textAlignment = .center
-        label.textColor = UIColor.white
-        label.text = "I'am a test label"
-        self.view.addSubview(label)
+        //Text Label
+        timerLabel = UILabel()
+        timerLabel.backgroundColor = UIColor.yellow
+        timerLabel.widthAnchor.constraint(equalToConstant: self.view.frame.width).isActive = true
+        timerLabel.heightAnchor.constraint(equalToConstant: 20.0).isActive = true
+        timerLabel.textAlignment = .center
+        
+        //Stack View
+        let stackView   = UIStackView()
+        stackView.axis  = NSLayoutConstraint.Axis.vertical
+        stackView.distribution  = UIStackView.Distribution.equalSpacing
+        stackView.alignment = UIStackView.Alignment.center
+        stackView.spacing   = 16.0
+        
+        stackView.addArrangedSubview(timerLabel)
+        stackView.addArrangedSubview(myCollectionView)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        self.view.addSubview(stackView)
+        
+        //Constraints
+        stackView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
+        stackView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
+        
+        // タイマーを作る
+        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(ViewController.onUpdate(timer:)), userInfo: nil, repeats: true)
+
+    }
+    
+    // TimerのtimeIntervalで指定された秒数毎に呼び出されるメソッド
+    @objc func onUpdate(timer : Timer){
+        
+        // カウントの値1増加
+        count += 1
+        
+        // 桁数を指定して文字列を作る
+        let str = String(format: "%.0f", count)
+        
+        // ラベルに表示
+        timerLabel.text = str
+        
     }
     
     /*
